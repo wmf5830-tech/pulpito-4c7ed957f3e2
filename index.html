@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#E56425">
+<title>Púlpito · Meus Esboços</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --o:#E56425;--o6:#C9531B;--o7:#A8430F;--o50:#FDEDE3;--o100:#FBD7C3;
+  --g:#005924;--g50:#E6F4EC;
+  --bg:#F5F5F6;--card:#fff;--b1:#DDDDE0;--b2:#ECECEE;--t1:#19191B;--t2:#3E3E43;--t3:#74747B;
+  --danger:#C8362D;--r:8px;--rl:10px;
+  --font:"Montserrat","Inter","Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--t1);font-family:var(--font);font-size:15px;line-height:1.5}
+#app{max-width:720px;margin:0 auto;min-height:100%;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+header.top{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--b1);padding:calc(10px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;gap:10px}
+header.top h1{font-size:17px;margin:0;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.logo{width:28px;height:28px;border-radius:50%;background:var(--o);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px}
+main{padding:14px 16px}
+button,input,select,textarea{font-family:inherit;font-size:15px;color:inherit}
+.btn{border:1px solid var(--b1);background:var(--card);border-radius:var(--r);padding:9px 14px;font-weight:600;cursor:pointer;min-height:40px}
+.btn.p{background:var(--o);border-color:var(--o);color:#fff}
+.btn.p:active{background:var(--o7)}
+.btn.s{padding:6px 10px;min-height:32px;font-size:13px}
+.btn.d{color:var(--danger)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--o7)}
+input[type=text],input[type=date],input[type=time],input[type=search],select,textarea{width:100%;border:1px solid var(--b1);border-radius:var(--r);padding:10px 12px;background:#fff;min-height:42px}
+textarea{min-height:110px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--o);outline-offset:-1px;border-color:var(--o)}
+label{display:block;font-size:12px;font-weight:600;color:var(--t3);margin:12px 0 4px;text-transform:uppercase;letter-spacing:.04em}
+.card{background:var(--card);border:1px solid var(--b1);border-radius:var(--rl);padding:14px;margin-bottom:10px}
+.card.click{cursor:pointer}
+.card h3{margin:0 0 4px;font-size:16px}
+.muted{color:var(--t3);font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{border:1px solid var(--b1);background:#fff;border-radius:999px;padding:4px 11px;font-size:12px;font-weight:600;cursor:pointer;color:var(--t2)}
+.chip.on{background:var(--o50);border-color:var(--o);color:var(--o7)}
+.tag{display:inline-block;background:var(--o50);color:var(--o7);border-radius:4px;padding:2px 7px;font-size:11px;font-weight:600;margin:2px 4px 2px 0}
+.tag.g{background:var(--g50);color:var(--g)}
+.row{display:flex;gap:8px;align-items:center}
+.row>*{flex:0 0 auto}.row>.grow{flex:1 1 auto}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--b1);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:6}
+nav.tabs button{flex:1;border:0;background:none;padding:10px 0 9px;font-size:11px;font-weight:600;color:var(--t3);cursor:pointer}
+nav.tabs button.on{color:var(--o)}
+nav.tabs button b{display:block;font-size:18px;line-height:1.2}
+.fab{position:fixed;right:16px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:7;width:54px;height:54px;border-radius:50%;background:var(--o);color:#fff;border:0;font-size:28px;box-shadow:0 4px 14px rgba(0,0,0,.25);cursor:pointer}
+/* tópicos expansíveis */
+.topic{background:var(--card);border:1px solid var(--b1);border-radius:var(--rl);margin-bottom:8px;overflow:hidden}
+.topic>button.th{width:100%;text-align:left;border:0;background:none;padding:13px 14px;display:flex;gap:10px;align-items:center;font-weight:700;cursor:pointer;font-size:inherit}
+.topic .n{flex:0 0 26px;height:26px;border-radius:50%;background:var(--o);color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center}
+.topic .tt{flex:1}
+.topic .car{transition:transform .15s;color:var(--t3)}
+.topic.open .car{transform:rotate(90deg)}
+.topic .tb{display:none;padding:0 14px 14px 50px;color:var(--t2);white-space:pre-wrap;word-wrap:break-word}
+.topic.open .tb{display:block}
+a.ref,.ref{color:var(--o7);font-weight:600;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;cursor:pointer}
+/* modal */
+.modal{position:fixed;inset:0;z-index:20;background:rgba(25,25,27,.5);display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:#fff;width:100%;max-width:720px;max-height:88vh;border-radius:16px 16px 0 0;display:flex;flex-direction:column}
+.sheet header{padding:14px 16px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:8px}
+.sheet header h2{margin:0;font-size:16px;flex:1}
+.sheet .body{padding:14px 16px calc(16px + env(safe-area-inset-bottom));overflow:auto}
+.verse{margin:0 0 8px}
+.verse sup{color:var(--o);font-weight:700;margin-right:4px;font-size:11px}
+.verse.hl{background:var(--o50);border-radius:4px;padding:2px 4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px}
+.grid button{padding:10px 4px}
+.sect{font-size:12px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin:18px 0 8px}
+/* modo pregação */
+body.preach{background:#fff}
+.preach-bar{position:sticky;top:0;z-index:5;background:var(--t1);color:#fff;padding:calc(8px + env(safe-area-inset-top)) 12px 8px;display:flex;gap:8px;align-items:center}
+.preach-bar .btn{background:#2c2c30;border-color:#3e3e43;color:#fff;min-height:36px;padding:6px 10px;font-size:13px}
+.preach-bar .grow{flex:1;font-weight:700;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.pm .topic .th{font-size:inherit}
+.pm .topic .tb{font-size:inherit}
+.empty{text-align:center;color:var(--t3);padding:36px 10px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom));background:var(--t1);color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;z-index:30}
+.note{background:var(--g50);border:1px solid #B8DEC8;border-radius:var(--r);padding:10px 12px;font-size:13px;color:var(--g)}
+.warn{background:#FBF1D9;border:1px solid #F0D58A;border-radius:var(--r);padding:10px 12px;font-size:13px;color:#7a5600}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+"use strict";
+/* ===================== LIVROS ===================== */
+const BOOKS=[
+["Gênesis","Gn","GEN",50,["genesis","gn","gen"]],["Êxodo","Êx","EXO",40,["exodo","ex","exo"]],["Levítico","Lv","LEV",27,["levitico","lv","lev"]],["Números","Nm","NUM",36,["numeros","nm","num"]],["Deuteronômio","Dt","DEU",34,["deuteronomio","dt","deut"]],
+["Josué","Js","JOS",24,["josue","js","jos"]],["Juízes","Jz","JDG",21,["juizes","jz","jui"]],["Rute","Rt","RUT",4,["rute","rt"]],["1 Samuel","1Sm","1SA",31,["1samuel","1sm","1sam"]],["2 Samuel","2Sm","2SA",24,["2samuel","2sm","2sam"]],
+["1 Reis","1Rs","1KI",22,["1reis","1rs"]],["2 Reis","2Rs","2KI",25,["2reis","2rs"]],["1 Crônicas","1Cr","1CH",29,["1cronicas","1cr"]],["2 Crônicas","2Cr","2CH",36,["2cronicas","2cr"]],["Esdras","Ed","EZR",10,["esdras","ed","esd"]],
+["Neemias","Ne","NEH",13,["neemias","ne"]],["Ester","Et","EST",10,["ester","et","est"]],["Jó","Jó","JOB",42,["jo","job"]],["Salmos","Sl","PSA",150,["salmos","salmo","sl"]],["Provérbios","Pv","PRO",31,["proverbios","pv","prov"]],
+["Eclesiastes","Ec","ECC",12,["eclesiastes","ec","ecl"]],["Cantares","Ct","SNG",8,["cantares","ct","cantico","canticos"]],["Isaías","Is","ISA",66,["isaias","is"]],["Jeremias","Jr","JER",52,["jeremias","jr"]],["Lamentações","Lm","LAM",5,["lamentacoes","lm","lam"]],
+["Ezequiel","Ez","EZK",48,["ezequiel","ez","eze"]],["Daniel","Dn","DAN",12,["daniel","dn","dan"]],["Oseias","Os","HOS",14,["oseias","os"]],["Joel","Jl","JOL",3,["joel","jl"]],["Amós","Am","AMO",9,["amos","am"]],
+["Obadias","Ob","OBA",1,["obadias","ob","abdias"]],["Jonas","Jn","JON",4,["jonas","jn"]],["Miqueias","Mq","MIC",7,["miqueias","mq","miq"]],["Naum","Na","NAM",3,["naum","na"]],["Habacuque","Hc","HAB",3,["habacuque","hc","hab"]],
+["Sofonias","Sf","ZEP",3,["sofonias","sf"]],["Ageu","Ag","HAG",2,["ageu","ag"]],["Zacarias","Zc","ZEC",14,["zacarias","zc","zac"]],["Malaquias","Ml","MAL",4,["malaquias","ml","mal"]],
+["Mateus","Mt","MAT",28,["mateus","mt","mat"]],["Marcos","Mc","MRK",16,["marcos","mc","mar"]],["Lucas","Lc","LUK",24,["lucas","lc","luc"]],["João","Jo","JHN",21,["joao","jo"]],["Atos","At","ACT",28,["atos","at"]],
+["Romanos","Rm","ROM",16,["romanos","rm","rom"]],["1 Coríntios","1Co","1CO",16,["1corintios","1co","1cor"]],["2 Coríntios","2Co","2CO",13,["2corintios","2co","2cor"]],["Gálatas","Gl","GAL",6,["galatas","gl","gal"]],["Efésios","Ef","EPH",6,["efesios","ef","efe"]],
+["Filipenses","Fp","PHP",4,["filipenses","fp","fil"]],["Colossenses","Cl","COL",4,["colossenses","cl","col"]],["1 Tessalonicenses","1Ts","1TH",5,["1tessalonicenses","1ts","1tes"]],["2 Tessalonicenses","2Ts","2TH",3,["2tessalonicenses","2ts","2tes"]],
+["1 Timóteo","1Tm","1TI",6,["1timoteo","1tm","1tim"]],["2 Timóteo","2Tm","2TI",4,["2timoteo","2tm","2tim"]],["Tito","Tt","TIT",3,["tito","tt"]],["Filemom","Fm","PHM",1,["filemom","fm","filemon"]],
+["Hebreus","Hb","HEB",13,["hebreus","hb","heb"]],["Tiago","Tg","JAS",5,["tiago","tg"]],["1 Pedro","1Pe","1PE",5,["1pedro","1pe","1ped"]],["2 Pedro","2Pe","2PE",3,["2pedro","2pe","2ped"]],
+["1 João","1Jo","1JN",5,["1joao","1jo"]],["2 João","2Jo","2JN",1,["2joao","2jo"]],["3 João","3Jo","3JN",1,["3joao","3jo"]],["Judas","Jd","JUD",1,["judas","jd"]],["Apocalipse","Ap","REV",22,["apocalipse","ap","apoc"]]
+];
+const norm=s=>s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[.\s]/g,"");
+const ALIAS={};BOOKS.forEach((b,i)=>{[b[0],b[1],b[2],...b[4]].forEach(a=>{const k=norm(a);if(!(k in ALIAS))ALIAS[k]=i;});});
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);
+const FACETS=[["tema","Tema"],["publico","Público"],["assunto","Assunto"],["livro","Livro"],["personagem","Personagem"]];
+
+/* ===================== ARMAZENAMENTO (IndexedDB, só no aparelho) ===================== */
+const DB={db:null,
+ open(){return new Promise((res,rej)=>{const r=indexedDB.open("pulpito",1);r.onupgradeneeded=()=>r.result.createObjectStore("kv");r.onsuccess=()=>{this.db=r.result;res();};r.onerror=()=>rej(r.error);});},
+ get(k){return new Promise(res=>{const q=this.db.transaction("kv").objectStore("kv").get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>res(undefined);});},
+ set(k,v){return new Promise((res,rej)=>{const t=this.db.transaction("kv","readwrite");t.objectStore("kv").put(v,k);t.oncomplete=res;t.onerror=()=>rej(t.error);});}
+};
+let S={sermons:[],agenda:[],settings:{fs:17}},BIBLE=null;
+const save=()=>DB.set("data",S);
+
+/* ===================== REFERÊNCIAS BÍBLICAS ===================== */
+const REF_RE=/(?<![A-Za-zÀ-ú0-9])((?:[1-3]\s?)?[A-Za-zÀ-ú]{1,14})\.?\s*(\d{1,3})(?:\s*[:.,]\s*(\d{1,3})(?:\s*[-–]\s*(\d{1,3}))?)?/g;
+function parseRefs(text){const out=[];let m;REF_RE.lastIndex=0;
+ while((m=REF_RE.exec(text))){const bi=ALIAS[norm(m[1])];if(bi===undefined){REF_RE.lastIndex=m.index+1;continue;}
+  const ch=+m[2];if(ch<1||ch>BOOKS[bi][3])continue;
+  out.push({i:m.index,len:m[0].length,b:bi,c:ch,v1:m[3]?+m[3]:null,v2:m[4]?+m[4]:(m[3]?+m[3]:null)});}
+ return out;}
+function linkify(text){const refs=parseRefs(text||"");let o="",p=0;
+ for(const r of refs){o+=esc(text.slice(p,r.i));
+  o+=`<span class="ref" data-act="ref" data-b="${r.b}" data-c="${r.c}" data-v1="${r.v1||""}" data-v2="${r.v2||""}">${esc(text.substr(r.i,r.len))}</span>`;p=r.i+r.len;}
+ return o+esc(text.slice(p));}
+
+/* ===================== IMPORTAR NAA ===================== */
+function normalizeBible(data){
+ const out=Array.from({length:66},()=>[]);let n=0;
+ const put=(b,c,v,t)=>{if(b==null||b<0||b>65)return;(out[b][c-1]??=[])[v-1]=String(t).trim();n++;};
+ const keyToBook=k=>ALIAS[norm(String(k))];
+ if(Array.isArray(data)&&data.length&&data[0]&&data[0].chapters){ // [{abbrev,name,chapters:[[v..]]}]
+  data.forEach((bk,idx)=>{let b=keyToBook(bk.name??bk.abbrev??"");if(b===undefined)b=data.length===66?idx:undefined;
+   (bk.chapters||[]).forEach((cap,ci)=>(cap||[]).forEach((t,vi)=>put(b,ci+1,vi+1,t)));});
+ }else if(Array.isArray(data)&&data.length&&typeof data[0]==="object"){ // flat verses
+  for(const r of data){const b=keyToBook(r.book??r.livro??r.name??r.abbrev);put(b,+(r.chapter??r.capitulo??r.cap),+(r.verse??r.versiculo??r.ver),r.text??r.texto);}
+ }else if(data&&typeof data==="object"&&!Array.isArray(data)){ // {Gênesis:[[..]]} ou {Gênesis:{1:{1:".."}}}
+  for(const [k,v] of Object.entries(data)){const b=keyToBook(k);if(b===undefined)continue;
+   if(Array.isArray(v))v.forEach((cap,ci)=>(cap||[]).forEach((t,vi)=>put(b,ci+1,vi+1,t)));
+   else for(const [c,vs] of Object.entries(v))for(const [vn,t] of Object.entries(vs))put(b,+c,+vn,t);}
+ }
+ return n>1000?out:null;}
+function parseBibleText(txt){ // linhas "Gênesis 1:1 No princípio..."
+ const out=Array.from({length:66},()=>[]);let n=0;
+ for(const line of txt.split(/\r?\n/)){const m=line.match(/^\s*((?:[1-3]\s?)?[A-Za-zÀ-ú]+\.?)\s+(\d+)[:.](\d+)\s+(.+)$/);if(!m)continue;
+  const b=ALIAS[norm(m[1])];if(b===undefined)continue;(out[b][+m[2]-1]??=[])[+m[3]-1]=m[4].trim();n++;}
+ return n>1000?out:null;}
+async function importNAA(file){
+ const txt=await file.text();let bible=null;
+ try{bible=normalizeBible(JSON.parse(txt));}catch(e){}
+ if(!bible)bible=parseBibleText(txt);
+ if(!bible){toast("Não reconheci o formato. Veja as instruções em Ajustes.");return;}
+ BIBLE=bible;await DB.set("bible",bible);toast("Bíblia NAA importada!");render();}
+function verses(b,c){return (BIBLE&&BIBLE[b]&&BIBLE[b][c-1])||null;}
+
+/* ===================== UI ===================== */
+const V={tab:"sermons",view:null,filter:{facet:null,val:null,q:""},modal:null,open:{},wake:null,preachFs:null};
+const $app=document.getElementById("app");
+function toast(t){const d=document.createElement("div");d.className="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2800);}
+const splitTags=s=>(s||"").split(",").map(x=>x.trim()).filter(Boolean);
+const dateFmt=d=>d?new Date(d+"T12:00:00").toLocaleDateString("pt-BR",{weekday:"short",day:"2-digit",month:"short",year:"numeric"}):"";
+
+function render(){
+ document.body.classList.toggle("preach",V.view&&V.view.type==="preach");
+ let h="";
+ if(V.view){ if(V.view.type==="edit")h=editView(); else if(V.view.type==="read")h=readView(false); else if(V.view.type==="preach")h=readView(true);
+  else if(V.view.type==="ag-edit")h=agEditView(); else if(V.view.type==="chap")h=chapView(); }
+ else h=tabView();
+ $app.innerHTML=h+(V.modal?modalView():"");
+ if(!V.view||(V.view.type!=="preach"))$app.insertAdjacentHTML("beforeend",tabsBar());
+}
+function tabsBar(){const T=[["sermons","📖","Esboços"],["bible","✝","Bíblia"],["agenda","📅","Agenda"],["settings","⚙","Ajustes"]];
+ return `<nav class="tabs">${T.map(t=>`<button class="${!V.view&&V.tab===t[0]?"on":""}" data-act="tab" data-t="${t[0]}"><b>${t[1]}</b>${t[2]}</button>`).join("")}</nav>`;}
+const topbar=(t,right="")=>`<header class="top"><span class="logo">P</span><h1>${esc(t)}</h1>${right}</header>`;
+
+/* ---- Lista de esboços ---- */
+function tabView(){
+ if(V.tab==="sermons")return sermonsView();
+ if(V.tab==="bible")return bibleView();
+ if(V.tab==="agenda")return agendaView();
+ return settingsView();}
+function sermonsView(){
+ const f=V.filter;let list=S.sermons.slice().sort((a,b)=>(b.updated||0)-(a.updated||0));
+ if(f.q){const q=norm(f.q);list=list.filter(s=>norm(s.title+" "+Object.values(s.facets||{}).join(" ")+" "+(s.topics||[]).map(t=>t.title+t.body).join(" ")).includes(q));}
+ if(f.facet&&f.val)list=list.filter(s=>splitTags(s.facets?.[f.facet]).map(x=>x.toLowerCase()).includes(f.val.toLowerCase()));
+ const vals=f.facet?[...new Set(S.sermons.flatMap(s=>splitTags(s.facets?.[f.facet])))].sort():[];
+ return topbar("Meus esboços")+`<main>
+ <input type="search" placeholder="Buscar em títulos, tópicos e comentários…" value="${esc(f.q)}" data-act="q">
+ <div class="chips">${FACETS.map(([k,l])=>`<button class="chip ${f.facet===k?"on":""}" data-act="facet" data-k="${k}">${l}</button>`).join("")}</div>
+ ${f.facet?`<div class="chips">${vals.length?vals.map(v=>`<button class="chip ${f.val===v?"on":""}" data-act="fval" data-v="${esc(v)}">${esc(v)}</button>`).join(""):`<span class="muted">Nenhum ${f.facet} cadastrado ainda.</span>`}</div>`:""}
+ ${list.length?list.map(s=>`<div class="card click" data-act="open" data-id="${s.id}"><h3>${esc(s.title||"Sem título")}</h3>
+   <div class="muted">${(s.topics||[]).length} tópicos${s.date?" · "+dateFmt(s.date):""}</div>
+   <div>${FACETS.flatMap(([k])=>splitTags(s.facets?.[k]).map(t=>`<span class="tag ${k==="livro"||k==="personagem"?"g":""}">${esc(t)}</span>`)).join("")}</div></div>`).join("")
+  :`<div class="empty">Nenhum esboço${f.q||f.val?" encontrado":" ainda"}.<br>Toque em <b>+</b> para criar ou importe em <b>Ajustes</b>.</div>`}
+ </main><button class="fab" data-act="new" aria-label="Novo esboço">+</button>`;}
+
+/* ---- Leitura / Modo pregação ---- */
+function readView(preach){
+ const s=S.sermons.find(x=>x.id===V.view.id);if(!s)return"";
+ const fs=preach?(V.preachFs||S.settings.fs||19):16;
+ const tops=(s.topics||[]).map((t,i)=>`<div class="topic ${V.open[s.id+"_"+t.id]?"open":""}">
+   <button class="th" data-act="tog" data-k="${s.id}_${t.id}"><span class="n">${i+1}</span><span class="tt">${linkify(t.title)}</span><span class="car">▸</span></button>
+   <div class="tb">${linkify(t.body||"")||'<span class="muted">(sem comentário)</span>'}</div></div>`).join("");
+ const ctrl=`<div class="row" style="margin:0 0 12px"><button class="btn s grow" data-act="all" data-v="1">Expandir todos</button><button class="btn s grow" data-act="all" data-v="0">Retrair todos</button></div>`;
+ if(preach)return `<div class="preach-bar"><button class="btn" data-act="back">✕</button><span class="grow">${esc(s.title)}</span><button class="btn" data-act="fs" data-d="-1">A−</button><button class="btn" data-act="fs" data-d="1">A+</button></div>
+  <main class="pm" style="font-size:${fs}px">${s.notes?`<div class="card" style="font-size:.85em">${linkify(s.notes)}</div>`:""}${ctrl}${tops}
+  <p class="muted" style="text-align:center">${V.wake?"Tela mantida acesa":"Tela sempre acesa indisponível neste navegador"}</p></main>`;
+ return topbar(s.title||"Esboço",`<button class="btn s" data-act="back">Voltar</button>`)+`<main>
+  <div>${FACETS.flatMap(([k,l])=>splitTags(s.facets?.[k]).map(t=>`<span class="tag ${k==="livro"||k==="personagem"?"g":""}" title="${l}">${esc(t)}</span>`)).join("")}</div>
+  ${s.date?`<p class="muted">Pregação em ${dateFmt(s.date)}</p>`:""}
+  ${s.notes?`<div class="card">${linkify(s.notes)}</div>`:""}
+  <div class="row" style="margin:12px 0"><button class="btn p grow" data-act="preach" data-id="${s.id}">Pregar (tela acesa)</button><button class="btn" data-act="edit" data-id="${s.id}">Editar</button></div>
+  ${ctrl}${tops||'<div class="empty">Sem tópicos. Toque em Editar.</div>'}
+  <p class="muted">Toque em qualquer referência bíblica (ex.: João 3:16) para abrir o texto NAA.</p></main>`;}
+
+/* ---- Editor ---- */
+function editView(){
+ const s=V.view.draft;
+ return topbar(V.view.isNew?"Novo esboço":"Editar esboço",`<button class="btn s" data-act="cancel">Cancelar</button><button class="btn p s" data-act="savesermon">Salvar</button>`)+`<main>
+  <label>Título</label><input type="text" data-f="title" value="${esc(s.title)}" placeholder="Ex.: A fé que vence o medo">
+  <label>Data da pregação (opcional)</label><input type="date" data-f="date" value="${esc(s.date||"")}">
+  ${FACETS.map(([k,l])=>`<label>${l} <span style="text-transform:none;font-weight:400">(separe por vírgula)</span></label><input type="text" data-fac="${k}" value="${esc(s.facets?.[k]||"")}" list="dl_${k}">
+   <datalist id="dl_${k}">${[...new Set(S.sermons.flatMap(x=>splitTags(x.facets?.[k])))].map(v=>`<option value="${esc(v)}">`).join("")}</datalist>`).join("")}
+  <label>Introdução / observações</label><textarea data-f="notes" style="min-height:70px">${esc(s.notes||"")}</textarea>
+  <div class="sect">Tópicos</div>
+  ${s.topics.map((t,i)=>`<div class="card"><div class="row"><b class="grow">Tópico ${i+1}</b>
+    <button class="btn s" data-act="up" data-i="${i}">↑</button><button class="btn s" data-act="dn" data-i="${i}">↓</button><button class="btn s d" data-act="deltopic" data-i="${i}">Excluir</button></div>
+   <label>Título do tópico</label><input type="text" data-ti="${i}" data-tf="title" value="${esc(t.title)}">
+   <label>Comentário (cite referências: Rm 8:28)</label><textarea data-ti="${i}" data-tf="body">${esc(t.body||"")}</textarea></div>`).join("")}
+  <button class="btn grow" style="width:100%" data-act="addtopic">+ Adicionar tópico</button>
+  ${V.view.isNew?"":`<button class="btn d" style="width:100%;margin-top:18px" data-act="delsermon">Excluir esboço</button>`}</main>`;}
+
+/* ---- Bíblia ---- */
+function bibleView(){
+ const warn=BIBLE?"":`<div class="warn" style="margin-bottom:12px">O texto da NAA ainda não foi importado. Vá em <b>Ajustes → Importar Bíblia NAA</b>. Enquanto isso, os capítulos abrem no site da SBB.</div>`;
+ const grp=(a,b,t)=>`<div class="sect">${t}</div><div class="grid">${BOOKS.slice(a,b).map((x,i)=>`<button class="btn s" data-act="book" data-b="${a+i}">${x[1]}</button>`).join("")}</div>`;
+ return topbar("Bíblia · NAA")+`<main>${warn}${grp(0,39,"Antigo Testamento")}${grp(39,66,"Novo Testamento")}</main>`;}
+function chapView(){
+ const b=V.view.b,bk=BOOKS[b];
+ if(V.view.c==null)return topbar(bk[0],`<button class="btn s" data-act="back">Voltar</button>`)+`<main>
+  <div class="card"><b>Estudo e introdução</b><div class="muted" style="margin:4px 0 8px">Vídeos do BibleProject em português sobre ${esc(bk[0])}.</div>
+  <a class="btn p s" style="display:inline-block;text-decoration:none" target="_blank" rel="noopener" href="${bpUrl(bk[0])}">Abrir no BibleProject</a></div>
+  <div class="sect">Capítulos</div><div class="grid">${Array.from({length:bk[3]},(_,i)=>`<button class="btn s" data-act="chap" data-b="${b}" data-c="${i+1}">${i+1}</button>`).join("")}</div></main>`;
+ const c=V.view.c,vs=verses(b,c);
+ return topbar(`${bk[0]} ${c}`,`<button class="btn s" data-act="chapback">Capítulos</button>`)+`<main>
+  ${vs?vs.map((t,i)=>t?`<p class="verse"><sup>${i+1}</sup>${esc(t)}</p>`:"").join(""):`<div class="warn">Texto NAA não importado. <a href="${sbbUrl(b,c)}" target="_blank" rel="noopener">Abrir ${esc(bk[0])} ${c} no site da SBB</a>.</div>`}
+  <div class="row" style="margin-top:16px"><button class="btn grow" ${c<=1?"disabled":""} data-act="chap" data-b="${b}" data-c="${c-1}">← Anterior</button><button class="btn grow" ${c>=bk[3]?"disabled":""} data-act="chap" data-b="${b}" data-c="${c+1}">Próximo →</button></div>
+  <p style="text-align:center"><a class="muted" target="_blank" rel="noopener" href="${bpUrl(bk[0])}">Estudo sobre ${esc(bk[0])} no BibleProject</a></p></main>`;}
+const sbbUrl=(b,c)=>`https://www.sbb.org.br/biblia/NAA/${BOOKS[b][2]}.${c}`;
+const bpUrl=n=>`https://www.youtube.com/@BibleProject-Portugu%C3%AAs/search?query=${encodeURIComponent(n)}`;
+
+/* ---- Modal de referência ---- */
+function modalView(){
+ const m=V.modal,bk=BOOKS[m.b],vs=verses(m.b,m.c);
+ const lbl=`${bk[0]} ${m.c}${m.v1?":"+m.v1+(m.v2&&m.v2!==m.v1?"–"+m.v2:""):""}`;
+ let body;
+ if(vs)body=vs.map((t,i)=>{const n=i+1,hl=m.v1&&n>=m.v1&&n<=(m.v2||m.v1);return t?`<p class="verse ${hl?"hl":""}" ${hl&&n===m.v1?'id="hlv"':""}><sup>${n}</sup>${esc(t)}</p>`:"";}).join("");
+ else body=`<div class="warn">O texto NAA ainda não foi importado (Ajustes → Importar Bíblia NAA).</div><p><a class="btn p s" style="text-decoration:none;display:inline-block" target="_blank" rel="noopener" href="${sbbUrl(m.b,m.c)}">Abrir no site da SBB</a></p>`;
+ return `<div class="modal" data-act="closemodal"><div class="sheet"><header><h2>${esc(lbl)} · NAA</h2>
+ <button class="btn s" data-act="mchap" data-d="-1" ${m.c<=1?"disabled":""}>←</button><button class="btn s" data-act="mchap" data-d="1" ${m.c>=bk[3]?"disabled":""}>→</button><button class="btn s" data-act="closemodal">Fechar</button></header>
+ <div class="body">${body}<p><a class="muted" target="_blank" rel="noopener" href="${bpUrl(bk[0])}">Estudo e introdução de ${esc(bk[0])} (BibleProject)</a></p></div></div></div>`;}
+
+/* ---- Agenda ---- */
+function agendaView(){
+ const today=new Date().toISOString().slice(0,10);
+ const all=S.agenda.slice().sort((a,b)=>(a.date+(a.time||"")).localeCompare(b.date+(b.time||"")));
+ const up=all.filter(a=>a.date>=today),past=all.filter(a=>a.date<today).reverse();
+ const item=a=>{const s=S.sermons.find(x=>x.id===a.sermonId);return `<div class="card click" data-act="agedit" data-id="${a.id}"><h3>${dateFmt(a.date)}${a.time?" · "+esc(a.time):""}</h3>
+  <div>${esc(a.place||"Local não informado")}</div><div class="muted">${s?"Esboço: "+esc(s.title):"Sem esboço vinculado"}</div>
+  ${s?`<button class="btn s p" style="margin-top:8px" data-act="preach" data-id="${s.id}">Pregar</button>`:""}</div>`;};
+ return topbar("Agenda de pregações")+`<main>${up.length?up.map(item).join(""):'<div class="empty">Nenhuma pregação agendada.</div>'}
+  ${past.length?`<div class="sect">Anteriores</div>${past.map(item).join("")}`:""}</main><button class="fab" data-act="agnew">+</button>`;}
+function agEditView(){
+ const a=V.view.draft;
+ return topbar(V.view.isNew?"Nova pregação":"Editar pregação",`<button class="btn s" data-act="cancel">Cancelar</button><button class="btn p s" data-act="agsave">Salvar</button>`)+`<main>
+ <label>Data</label><input type="date" data-ag="date" value="${esc(a.date)}"><label>Horário</label><input type="time" data-ag="time" value="${esc(a.time||"")}">
+ <label>Local / Igreja</label><input type="text" data-ag="place" value="${esc(a.place||"")}">
+ <label>Esboço</label><select data-ag="sermonId"><option value="">— nenhum —</option>${S.sermons.map(s=>`<option value="${s.id}" ${s.id===a.sermonId?"selected":""}>${esc(s.title)}</option>`).join("")}</select>
+ ${V.view.isNew?"":`<button class="btn d" style="width:100%;margin-top:18px" data-act="agdel">Excluir</button>`}</main>`;}
+
+/* ---- Ajustes ---- */
+function settingsView(){
+ return topbar("Ajustes")+`<main>
+ <div class="note" style="margin-bottom:12px">Privado: tudo fica salvo somente neste aparelho. Nada é enviado a servidores.</div>
+ <div class="card"><h3>Bíblia NAA ${BIBLE?'<span class="tag g">importada</span>':'<span class="tag">pendente</span>'}</h3>
+  <p class="muted">A NAA é © Sociedade Bíblica do Brasil e não vem embutida. Importe um arquivo seu (.json ou .txt) uma única vez; depois funciona offline. Formatos aceitos: JSON por livros/capítulos/versículos, lista plana {livro,capitulo,versiculo,texto}, ou texto com linhas "Gênesis 1:1 No princípio…".</p>
+  <button class="btn p" data-act="pick" data-t="naa">Importar arquivo NAA</button>
+  ${BIBLE?`<button class="btn d" style="margin-left:6px" data-act="delbible">Remover</button>`:""}</div>
+ <div class="card"><h3>Importar pregações</h3>
+  <p class="muted">Aceita backup .json deste app ou texto (.txt/.md): "# Título", "## Tópico" e o comentário nas linhas seguintes. Pode escolher vários arquivos.</p>
+  <button class="btn p" data-act="pick" data-t="serm">Importar esboços</button></div>
+ <div class="card"><h3>Backup</h3><p class="muted">Exporta esboços e agenda em um arquivo .json.</p><button class="btn" data-act="export">Exportar backup</button></div>
+ <div class="card"><h3>Em breve (fase 2)</h3><p class="muted">Criação de slides com IA e projeção com controle pelo app.</p></div>
+ <input type="file" id="file" hidden multiple></main>`;}
+
+/* ===================== IMPORTAR/EXPORTAR ESBOÇOS ===================== */
+function parseSermonText(txt,name){
+ const lines=txt.split(/\r?\n/);let title=name.replace(/\.[^.]+$/,""),topics=[],cur=null,notes=[],started=false;
+ for(const raw of lines){const l=raw.trimEnd();
+  let m;
+  if((m=l.match(/^#\s+(.*)/))&&!started){title=m[1];started=true;continue;}
+  if((m=l.match(/^(?:##+|\d+[.)]|[IVX]+[.)])\s+(.*)/))){cur={id:uid(),title:m[1].trim(),body:""};topics.push(cur);started=true;continue;}
+  if(cur)cur.body+=(cur.body?"\n":"")+l;else if(l.trim()){if(!started&&topics.length===0&&title===name.replace(/\.[^.]+$/,"")&&!notes.length&&l.length<90){title=l.trim();started=true;}else notes.push(l);}}
+ topics.forEach(t=>t.body=t.body.trim());
+ return {id:uid(),title,date:"",facets:{},notes:notes.join("\n"),topics,updated:Date.now()};}
+async function importSermons(files){let n=0;
+ for(const f of files){const txt=await f.text();
+  if(/\.json$/i.test(f.name)){try{const d=JSON.parse(txt);const sm=d.sermons||(Array.isArray(d)?d:[]);
+    sm.forEach(s=>{if(s&&s.title!==undefined){S.sermons.push({...s,id:uid(),updated:Date.now(),topics:(s.topics||[]).map(t=>({id:uid(),title:t.title||"",body:t.body||""}))});n++;}});
+    if(d.agenda)d.agenda.forEach(a=>{S.agenda.push({...a,id:uid()});});}catch(e){}}
+  else{S.sermons.push(parseSermonText(txt,f.name));n++;}}
+ await save();toast(n+" esboço(s) importado(s)");render();}
+
+/* ===================== TELA SEMPRE ACESA ===================== */
+async function wakeOn(){try{if("wakeLock"in navigator){V.wake=await navigator.wakeLock.request("screen");V.wake.addEventListener("release",()=>{});}}catch(e){V.wake=null;}}
+function wakeOff(){try{V.wake&&V.wake.release();}catch(e){}V.wake=null;}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&V.view&&V.view.type==="preach")wakeOn();});
+
+/* ===================== EVENTOS ===================== */
+document.addEventListener("click",async e=>{
+ const el=e.target.closest("[data-act]");if(!el)return;const a=el.dataset.act,d=el.dataset;
+ if(a==="closemodal"&&el.classList.contains("modal")&&e.target!==el)return;
+ switch(a){
+  case"tab":V.tab=d.t;V.view=null;V.modal=null;break;
+  case"facet":V.filter.facet=V.filter.facet===d.k?null:d.k;V.filter.val=null;break;
+  case"fval":V.filter.val=V.filter.val===d.v?null:d.v;break;
+  case"open":V.view={type:"read",id:d.id};scrollTo(0,0);break;
+  case"back":wakeOff();V.view=V.view.type==="preach"?{type:"read",id:V.view.id}:null;break;
+  case"tog":V.open[d.k]=!V.open[d.k];break;
+  case"all":{const s=S.sermons.find(x=>x.id===V.view.id);s.topics.forEach(t=>V.open[s.id+"_"+t.id]=d.v==="1");break;}
+  case"preach":V.view={type:"preach",id:d.id};V.preachFs=S.settings.fs||19;wakeOn();scrollTo(0,0);break;
+  case"fs":V.preachFs=Math.max(13,Math.min(34,(V.preachFs||19)+ +d.d*2));S.settings.fs=V.preachFs;save();break;
+  case"new":V.view={type:"edit",isNew:true,draft:{id:uid(),title:"",date:"",facets:{},notes:"",topics:[{id:uid(),title:"",body:""}]}};break;
+  case"edit":V.view={type:"edit",isNew:false,draft:JSON.parse(JSON.stringify(S.sermons.find(x=>x.id===d.id)))};break;
+  case"cancel":V.view=null;break;
+  case"addtopic":V.view.draft.topics.push({id:uid(),title:"",body:""});break;
+  case"deltopic":V.view.draft.topics.splice(+d.i,1);break;
+  case"up":{const t=V.view.draft.topics,i=+d.i;if(i>0)[t[i-1],t[i]]=[t[i],t[i-1]];break;}
+  case"dn":{const t=V.view.draft.topics,i=+d.i;if(i<t.length-1)[t[i+1],t[i]]=[t[i],t[i+1]];break;}
+  case"savesermon":{const s=V.view.draft;if(!s.title.trim()){toast("Dê um título ao esboço");return;}s.updated=Date.now();
+   const i=S.sermons.findIndex(x=>x.id===s.id);if(i>=0)S.sermons[i]=s;else S.sermons.push(s);await save();V.view={type:"read",id:s.id};toast("Esboço salvo");break;}
+  case"delsermon":if(confirm("Excluir este esboço definitivamente?")){S.sermons=S.sermons.filter(x=>x.id!==V.view.draft.id);S.agenda.forEach(x=>{if(x.sermonId===V.view.draft.id)x.sermonId="";});await save();V.view=null;}else return;break;
+  case"ref":V.modal={b:+d.b,c:+d.c,v1:d.v1?+d.v1:null,v2:d.v2?+d.v2:null};break;
+  case"closemodal":V.modal=null;break;
+  case"mchap":V.modal={b:V.modal.b,c:V.modal.c+ +d.d};break;
+  case"book":V.view={type:"chap",b:+d.b,c:null};break;
+  case"chap":V.view={type:"chap",b:+d.b,c:+d.c};scrollTo(0,0);break;
+  case"chapback":V.view={type:"chap",b:V.view.b,c:null};break;
+  case"agnew":V.view={type:"ag-edit",isNew:true,draft:{id:uid(),date:new Date().toISOString().slice(0,10),time:"",place:"",sermonId:""}};break;
+  case"agedit":V.view={type:"ag-edit",isNew:false,draft:{...S.agenda.find(x=>x.id===d.id)}};break;
+  case"agsave":{const a2=V.view.draft;if(!a2.date){toast("Informe a data");return;}const i=S.agenda.findIndex(x=>x.id===a2.id);if(i>=0)S.agenda[i]=a2;else S.agenda.push(a2);await save();V.view=null;V.tab="agenda";break;}
+  case"agdel":if(confirm("Excluir esta pregação da agenda?")){S.agenda=S.agenda.filter(x=>x.id!==V.view.draft.id);await save();V.view=null;}else return;break;
+  case"pick":{const f=document.getElementById("file");f.dataset.t=d.t;f.accept=d.t==="naa"?".json,.txt,text/plain,application/json":".json,.txt,.md,text/plain,text/markdown,application/json";f.multiple=d.t!=="naa";f.click();return;}
+  case"delbible":if(confirm("Remover o texto NAA importado?")){BIBLE=null;await DB.set("bible",null);}else return;break;
+  case"export":{const blob=new Blob([JSON.stringify({sermons:S.sermons,agenda:S.agenda},null,1)],{type:"application/json"});const u=URL.createObjectURL(blob);const x=document.createElement("a");x.href=u;x.download="pulpito-backup-"+new Date().toISOString().slice(0,10)+".json";x.click();setTimeout(()=>URL.revokeObjectURL(u),2000);return;}
+  default:return;
+ }
+ render();
+ if(a==="ref"){const h=document.getElementById("hlv");if(h)h.scrollIntoView({block:"center"});}
+});
+document.addEventListener("change",async e=>{
+ const t=e.target;
+ if(t.id==="file"){const fs=[...t.files];t.value="";if(!fs.length)return;if(t.dataset.t==="naa")await importNAA(fs[0]);else await importSermons(fs);return;}
+});
+document.addEventListener("input",e=>{
+ const t=e.target;
+ if(t.dataset.act==="q"){V.filter.q=t.value;const p=t.selectionStart;render();const n=document.querySelector('[data-act="q"]');if(n){n.focus();n.setSelectionRange(p,p);}return;}
+ const v=V.view;if(!v)return;
+ if(t.dataset.f!==undefined)v.draft[t.dataset.f]=t.value;
+ else if(t.dataset.fac)(v.draft.facets??={})[t.dataset.fac]=t.value;
+ else if(t.dataset.ti!==undefined)v.draft.topics[+t.dataset.ti][t.dataset.tf]=t.value;
+ else if(t.dataset.ag)v.draft[t.dataset.ag]=t.value;
+});
+
+/* ===================== INÍCIO ===================== */
+(async()=>{
+ try{await DB.open();const d=await DB.get("data");if(d)S={...S,...d};BIBLE=(await DB.get("bible"))||null;}catch(e){toast("Armazenamento indisponível neste navegador");}
+ render();
+})();
+</script>
+</body>
+</html>
