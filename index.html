@@ -58,7 +58,9 @@ nav.tabs button b{display:block;font-size:18px;line-height:1.2}
 .topic .tt{flex:1}
 .topic .car{transition:transform .15s;color:var(--t3)}
 .topic.open .car{transform:rotate(90deg)}
-.topic .tb{display:none;padding:0 14px 14px 50px;color:var(--t2);white-space:pre-wrap;word-wrap:break-word}
+.topic .tb{display:none;padding:0 14px 14px 50px;color:var(--t2);word-wrap:break-word;line-height:1.7}
+.tb p{margin:0 0 .85em}.tb ul,.tb ol{margin:0 0 .85em;padding-left:1.3em}.tb li{margin-bottom:.4em}.tb b{color:var(--t1);font-weight:700}.tb u{text-decoration-thickness:2px;text-underline-offset:3px}
+.fmtbar{display:flex;gap:6px;margin:6px 0}.fmtbar .btn{min-width:42px}
 .topic.open .tb{display:block}
 a.ref,.ref{color:var(--o7);font-weight:600;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;cursor:pointer}
 /* modal */
@@ -75,7 +77,9 @@ a.ref,.ref{color:var(--o7);font-weight:600;text-decoration:underline;text-decora
 .sect{font-size:12px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin:18px 0 8px}
 /* modo pregação */
 body.preach{background:#fff}
-.preach-bar{position:sticky;top:0;z-index:5;background:var(--t1);color:#fff;padding:calc(8px + env(safe-area-inset-top)) 12px 8px;display:flex;gap:8px;align-items:center}
+.preach-bar{position:sticky;top:0;z-index:5;background:var(--t1);color:#fff;padding:calc(8px + env(safe-area-inset-top)) 12px 8px}
+.pb{display:flex;gap:8px;align-items:center}.pb+.pb{margin-top:6px}
+.clk,.tmr{font-weight:700;font-variant-numeric:tabular-nums;font-size:18px}.tmr{color:#FBD7C3}
 .preach-bar .btn{background:#2c2c30;border-color:#3e3e43;color:#fff;min-height:36px;padding:6px 10px;font-size:13px}
 .preach-bar .grow{flex:1;font-weight:700;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .pm .topic .th{font-size:inherit}
@@ -109,6 +113,8 @@ const BOOKS=[
 ];
 const norm=s=>s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[.\s]/g,"");
 const ALIAS={};BOOKS.forEach((b,i)=>{[b[0],b[1],b[2],...b[4]].forEach(a=>{const k=norm(a);if(!(k in ALIAS))ALIAS[k]=i;});});
+ALIAS["jo"]=42; // "Jo" = João; "Jó" (com acento) tratado à parte
+const isJo=t=>/^[jJ][óÓ]$/.test(String(t).trim());
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const uid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);
 const FACETS=[["tema","Tema"],["publico","Público"],["assunto","Assunto"],["livro","Livro"],["personagem","Personagem"]];
@@ -125,7 +131,7 @@ const save=()=>DB.set("data",S);
 /* ===================== REFERÊNCIAS BÍBLICAS ===================== */
 const REF_RE=/(?<![A-Za-zÀ-ú0-9])((?:[1-3]\s?)?[A-Za-zÀ-ú]{1,14})\.?\s*(\d{1,3})(?:\s*[:.,]\s*(\d{1,3})(?:\s*[-–]\s*(\d{1,3}))?)?/g;
 function parseRefs(text){const out=[];let m;REF_RE.lastIndex=0;
- while((m=REF_RE.exec(text))){const bi=ALIAS[norm(m[1])];if(bi===undefined){REF_RE.lastIndex=m.index+1;continue;}
+ while((m=REF_RE.exec(text))){const bi=isJo(m[1])?17:ALIAS[norm(m[1])];if(bi===undefined){REF_RE.lastIndex=m.index+1;continue;}
   const ch=+m[2];if(ch<1||ch>BOOKS[bi][3])continue;
   out.push({i:m.index,len:m[0].length,b:bi,c:ch,v1:m[3]?+m[3]:null,v2:m[4]?+m[4]:(m[3]?+m[3]:null)});}
  return out;}
@@ -134,11 +140,37 @@ function linkify(text){const refs=parseRefs(text||"");let o="",p=0;
   o+=`<span class="ref" data-act="ref" data-b="${r.b}" data-c="${r.c}" data-v1="${r.v1||""}" data-v2="${r.v2||""}">${esc(text.substr(r.i,r.len))}</span>`;p=r.i+r.len;}
  return o+esc(text.slice(p));}
 
+const inl=h=>h.replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/__(.+?)__/g,"<u>$1</u>");
+function fmt(text){
+ if(!text)return"";let out="",list=null,para=[];
+ const fp=()=>{if(para.length){out+="<p>"+para.map(l=>inl(linkify(l))).join("<br>")+"</p>";para=[];}};
+ const cl=()=>{if(list){out+="</"+list+">";list=null;}};
+ for(const raw of text.split(/\r?\n/)){const t=raw.trim();
+  if(!t){fp();cl();continue;}
+  let m;
+  if((m=t.match(/^[-•*]\s+(.*)/))){fp();if(list!=="ul"){cl();out+="<ul>";list="ul";}out+="<li>"+inl(linkify(m[1]))+"</li>";}
+  else if((m=t.match(/^(\d{1,2})[.)]\s+(.*)/))){fp();if(list!=="ol"){cl();out+=`<ol start="${m[1]}">`;list="ol";}out+="<li>"+inl(linkify(m[2]))+"</li>";}
+  else{cl();para.push(t);}}
+ fp();cl();return out;}
+function autoOrg(s){return s.replace(/\s*(Aplicação:)/g,"\n\n**$1**").replace(/\s+(\d{1,2})\.\s+(?=[A-ZÁÉÍÓÚÂÊÔÃÕÇ])/g,"\n\n$1. ").replace(/^\s+/,"").replace(/\n{3,}/g,"\n\n");}
+function applyFmt(ta,k){
+ let v=ta.value,a=ta.selectionStart,b=ta.selectionEnd;
+ if(k==="auto")return autoOrg(v);
+ if(k==="b"||k==="u"){const w=k==="b"?"**":"__";if(a===b)return v;return v.slice(0,a)+w+v.slice(a,b)+w+v.slice(b);}
+ const ls=v.lastIndexOf("\n",a-1)+1;let le=v.indexOf("\n",b);if(le<0)le=v.length;
+ const seg=v.slice(ls,le).split("\n").map((l,i)=>{l=l.replace(/^(?:[-•*]|\d{1,2}[.)])\s+/,"");return k==="ul"?"- "+l:(i+1)+". "+l;}).join("\n");
+ return v.slice(0,ls)+seg+v.slice(le);}
+/* cronômetro e relógio */
+const clock=()=>new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+const elapsed=()=>V.tm?V.tm.acc+(V.tm.run?Date.now()-V.tm.start:0):0;
+function fmtT(ms){const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60,p=n=>String(n).padStart(2,"0");return (h?h+":":"")+p(m)+":"+p(x);}
+setInterval(()=>{const a=document.getElementById("tm"),c=document.getElementById("clk");if(c)c.textContent=clock();if(a)a.textContent=fmtT(elapsed());},1000);
+
 /* ===================== IMPORTAR NAA ===================== */
 function normalizeBible(data){
  const out=Array.from({length:66},()=>[]);let n=0;
  const put=(b,c,v,t)=>{if(b==null||b<0||b>65)return;(out[b][c-1]??=[])[v-1]=String(t).trim();n++;};
- const keyToBook=k=>ALIAS[norm(String(k))];
+ const keyToBook=k=>isJo(k)?17:ALIAS[norm(String(k))];
  if(Array.isArray(data)&&data.length&&data[0]&&data[0].chapters){ // [{abbrev,name,chapters:[[v..]]}]
   data.forEach((bk,idx)=>{let b=keyToBook(bk.name??bk.abbrev??"");if(b===undefined)b=data.length===66?idx:undefined;
    (bk.chapters||[]).forEach((cap,ci)=>(cap||[]).forEach((t,vi)=>put(b,ci+1,vi+1,t)));});
@@ -164,7 +196,7 @@ async function importNAA(file){
 function verses(b,c){return (BIBLE&&BIBLE[b]&&BIBLE[b][c-1])||null;}
 
 /* ===================== UI ===================== */
-const V={tab:"sermons",view:null,filter:{facet:null,val:null,q:""},modal:null,open:{},wake:null,preachFs:null};
+const V={tm:null,tab:"sermons",view:null,filter:{facet:null,val:null,q:""},modal:null,open:{},wake:null,preachFs:null};
 const $app=document.getElementById("app");
 function toast(t){const d=document.createElement("div");d.className="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2800);}
 const splitTags=s=>(s||"").split(",").map(x=>x.trim()).filter(Boolean);
@@ -210,15 +242,16 @@ function readView(preach){
  const fs=preach?(V.preachFs||S.settings.fs||19):16;
  const tops=(s.topics||[]).map((t,i)=>`<div class="topic ${V.open[s.id+"_"+t.id]?"open":""}">
    <button class="th" data-act="tog" data-k="${s.id}_${t.id}"><span class="n">${i+1}</span><span class="tt">${linkify(t.title)}</span><span class="car">▸</span></button>
-   <div class="tb">${linkify(t.body||"")||'<span class="muted">(sem comentário)</span>'}</div></div>`).join("");
+   <div class="tb">${fmt(t.body)||'<span class="muted">(sem comentário)</span>'}</div></div>`).join("");
  const ctrl=`<div class="row" style="margin:0 0 12px"><button class="btn s grow" data-act="all" data-v="1">Expandir todos</button><button class="btn s grow" data-act="all" data-v="0">Retrair todos</button></div>`;
- if(preach)return `<div class="preach-bar"><button class="btn" data-act="back">✕</button><span class="grow">${esc(s.title)}</span><button class="btn" data-act="fs" data-d="-1">A−</button><button class="btn" data-act="fs" data-d="1">A+</button></div>
-  <main class="pm" style="font-size:${fs}px">${s.notes?`<div class="card" style="font-size:.85em">${linkify(s.notes)}</div>`:""}${ctrl}${tops}
+ if(preach)return `<div class="preach-bar"><div class="pb"><button class="btn" data-act="back">✕</button><span class="grow">${esc(s.title)}</span><button class="btn" data-act="fs" data-d="-1">A−</button><button class="btn" data-act="fs" data-d="1">A+</button></div>
+  <div class="pb"><span class="clk" id="clk">${clock()}</span><span class="grow" style="text-align:center"><span class="tmr" id="tm">${fmtT(elapsed())}</span></span><button class="btn" data-act="tmtog">${V.tm&&V.tm.run?"Pausar":"Iniciar"}</button><button class="btn" data-act="tmreset">Zerar</button></div></div>
+  <main class="pm" style="font-size:${fs}px">${s.notes?`<div class="card tb" style="display:block;padding:14px;font-size:.85em">${fmt(s.notes)}</div>`:""}${ctrl}${tops}
   <p class="muted" style="text-align:center">${V.wake?"Tela mantida acesa":"Tela sempre acesa indisponível neste navegador"}</p></main>`;
  return topbar(s.title||"Esboço",`<button class="btn s" data-act="back">Voltar</button>`)+`<main>
   <div>${FACETS.flatMap(([k,l])=>splitTags(s.facets?.[k]).map(t=>`<span class="tag ${k==="livro"||k==="personagem"?"g":""}" title="${l}">${esc(t)}</span>`)).join("")}</div>
   ${s.date?`<p class="muted">Pregação em ${dateFmt(s.date)}</p>`:""}
-  ${s.notes?`<div class="card">${linkify(s.notes)}</div>`:""}
+  ${s.notes?`<div class="card tb" style="display:block;padding:14px">${fmt(s.notes)}</div>`:""}
   <div class="row" style="margin:12px 0"><button class="btn p grow" data-act="preach" data-id="${s.id}">Pregar (tela acesa)</button><button class="btn" data-act="edit" data-id="${s.id}">Editar</button></div>
   ${ctrl}${tops||'<div class="empty">Sem tópicos. Toque em Editar.</div>'}
   <p class="muted">Toque em qualquer referência bíblica (ex.: João 3:16) para abrir o texto NAA.</p></main>`;}
@@ -236,7 +269,8 @@ function editView(){
   ${s.topics.map((t,i)=>`<div class="card"><div class="row"><b class="grow">Tópico ${i+1}</b>
     <button class="btn s" data-act="up" data-i="${i}">↑</button><button class="btn s" data-act="dn" data-i="${i}">↓</button><button class="btn s d" data-act="deltopic" data-i="${i}">Excluir</button></div>
    <label>Título do tópico</label><input type="text" data-ti="${i}" data-tf="title" value="${esc(t.title)}">
-   <label>Comentário (cite referências: Rm 8:28)</label><textarea data-ti="${i}" data-tf="body">${esc(t.body||"")}</textarea></div>`).join("")}
+   <label>Comentário (cite referências: Rm 8:28)</label>
+   <div class="fmtbar"><button class="btn s" data-act="fmt" data-k="b" data-i="${i}" title="Negrito: selecione o texto"><b>N</b></button><button class="btn s" data-act="fmt" data-k="u" data-i="${i}" title="Sublinhado: selecione o texto"><u>S</u></button><button class="btn s" data-act="fmt" data-k="ul" data-i="${i}">• Lista</button><button class="btn s" data-act="fmt" data-k="ol" data-i="${i}">1. Lista</button><button class="btn s" data-act="fmt" data-k="auto" data-i="${i}">Organizar</button></div><textarea data-ti="${i}" data-tf="body">${esc(t.body||"")}</textarea></div>`).join("")}
   <button class="btn grow" style="width:100%" data-act="addtopic">+ Adicionar tópico</button>
   ${V.view.isNew?"":`<button class="btn d" style="width:100%;margin-top:18px" data-act="delsermon">Excluir esboço</button>`}</main>`;}
 
@@ -336,9 +370,12 @@ document.addEventListener("click",async e=>{
   case"fval":V.filter.val=V.filter.val===d.v?null:d.v;break;
   case"open":V.view={type:"read",id:d.id};scrollTo(0,0);break;
   case"back":wakeOff();V.view=V.view.type==="preach"?{type:"read",id:V.view.id}:null;break;
+  case"tmtog":{const t=V.tm;if(t.run){t.acc+=Date.now()-t.start;t.run=false;}else{t.start=Date.now();t.run=true;}break;}
+  case"tmreset":V.tm={start:Date.now(),acc:0,run:false};break;
+  case"fmt":{const ta=document.querySelector(`[data-ti="${d.i}"][data-tf="body"]`);if(!ta)return;V.view.draft.topics[+d.i].body=applyFmt(ta,d.k);break;}
   case"tog":V.open[d.k]=!V.open[d.k];break;
   case"all":{const s=S.sermons.find(x=>x.id===V.view.id);s.topics.forEach(t=>V.open[s.id+"_"+t.id]=d.v==="1");break;}
-  case"preach":V.view={type:"preach",id:d.id};V.preachFs=S.settings.fs||19;wakeOn();scrollTo(0,0);break;
+  case"preach":V.view={type:"preach",id:d.id};V.tm={start:Date.now(),acc:0,run:true};V.preachFs=S.settings.fs||19;wakeOn();scrollTo(0,0);break;
   case"fs":V.preachFs=Math.max(13,Math.min(34,(V.preachFs||19)+ +d.d*2));S.settings.fs=V.preachFs;save();break;
   case"new":V.view={type:"edit",isNew:true,draft:{id:uid(),title:"",date:"",facets:{},notes:"",topics:[{id:uid(),title:"",body:""}]}};break;
   case"edit":V.view={type:"edit",isNew:false,draft:JSON.parse(JSON.stringify(S.sermons.find(x=>x.id===d.id)))};break;
